@@ -1,69 +1,71 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import sys
 
 from typing import List, Generator
 import heapq
 
 
 class Graph:
-    def __init__(self, vertex_count: int) -> None:
+    def __init__(self, vertex_count):
         self.adj = [[] for _ in range(vertex_count)]
 
-    def add_edge(self, s: int, t: int, w: int) -> None:
+    def add_edge(self, s, t, w):
         edge = Edge(s, t, w)
         self.adj[s].append(edge)
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.adj)
 
 
+# 下面这个类是为了dijkstra实现用的
 class Vertex:
-    def __init__(self, v: int, dist: int) -> None:
-        self.id = v
-        self.dist = dist
+    def __init__(self, v, dist):
+        self.id = v         # 顶点编号ID
+        self.dist = dist    # 从起始顶点到这个顶点的距离
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other):
         return self.dist > other.dist
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return str((self.id, self.dist))
 
 
 class Edge:
-    def __init__(self, source: int, target: int, weight: int) -> None:
+    def __init__(self, source, target, weight):
         self.s = source
         self.t = target
         self.w = weight
 
 
 class VertexPriorityQueue:
-    def __init__(self) -> None:
+    def __init__(self):
         self.vertices = []
 
-    def get(self) -> Vertex:
+    def get(self):
         return heapq.heappop(self.vertices)
 
-    def put(self, v: Vertex) -> None:
+    def put(self, v):
         self.vertices.append(v)
         self.update_priority()
 
-    def empty(self) -> bool:
+    def empty(self):
         return len(self.vertices) == 0
 
-    def update_priority(self) -> None:
+    def update_priority(self):
         heapq.heapify(self.vertices)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return str(self.vertices)
 
 
-def dijkstra(g: Graph, s: int, t: int) -> int:
+def dijkstra(g, s, t):
     size = len(g)
 
     pq = VertexPriorityQueue()  # 节点队列
     in_queue = [False] * size   # 已入队标记
     vertices = [                # 需要随时更新离s的最短距离的节点列表
-        Vertex(v, float('inf')) for v in range(size)
+        Vertex(v, sys.maxint) for v in range(size)
     ]
     predecessor = [-1] * size   # 先驱
 
@@ -88,20 +90,16 @@ def dijkstra(g: Graph, s: int, t: int) -> int:
                 pq.put(vertices[edge.t])
                 in_queue[edge.t] = True
 
-    for n in print_path(s, t, predecessor):
-        if n == t:
-            print(t)
-        else:
-            print(n, end=' -> ')
+    print_path(s, t, predecessor)
     return vertices[t].dist
 
 
-def print_path(s: int, t: int, p: List[int]) -> Generator[int, None, None]:
+def print_path(s, t, p):
     if t == s:
-        yield s
+        print(s)
     else:
-        yield from print_path(s, p[t], p)
-        yield t
+        print_path(s, p[t], p)
+        print t
 
 
 if __name__ == '__main__':
